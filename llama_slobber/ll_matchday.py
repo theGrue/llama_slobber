@@ -29,12 +29,19 @@ class GetMatchDay(HTMLParser):
     def __init__(self):
         HTMLParser.__init__(self)
         self.getdata = False
+        self.resume = False
         self.result = []
 
     def handle_starttag(self, tag, attrs):
         for apt in attrs:
+            # Workaround for malformed titles which parse as separate attrs.
+            if self.resume and apt[1] is None:
+                self.result[-1] = self.result[-1] + apt[0]
+            self.resume = False
+
             if apt[0] == 'title':
                 self.result.append(apt[1])
+                self.resume = True
             if apt[0] == 'class':
                 if apt[1] == 'c0' or apt[1] == 'c1' or apt[1] == 'cF':
                     self.result.append(apt[1])
